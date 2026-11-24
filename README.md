@@ -13,6 +13,34 @@ npm start
 
 O npm instala o FFmpeg opcionalmente. Se o binário não estiver disponível para a sua plataforma, instale o FFmpeg no `PATH` ou informe o caminho com `ONVIF_FFMPEG`. No macOS, permita acesso à Rede Local para o aplicativo ou terminal se o sistema solicitar.
 
+## Gerar executáveis e instaladores
+
+| Sistema | Arquitetura | Arquivos |
+| --- | --- | --- |
+| Windows | x64 | Instalador NSIS `.exe` |
+| macOS 13 ou posterior | Apple Silicon ou Intel | Imagem `.dmg` com o aplicativo `.app` |
+| Linux | x64 | `.AppImage` portátil e pacote `.deb` para Debian/Ubuntu |
+
+No GitHub, execute **Actions → Instaladores → Run workflow**. O workflow também roda ao enviar uma tag `v*`. Cada sistema gera seu próprio artefato, disponível na página da execução.
+
+Para gerar localmente, use o sistema e a arquitetura de destino com Node.js 22.12 ou posterior. Instale as ferramentas de compilação do sistema.
+
+- **macOS** — instale as ferramentas de linha de comando do Xcode com `xcode-select --install`.
+- **Linux (Debian/Ubuntu)** — instale `build-essential libgnutls28-dev nasm pkg-config fakeroot curl xz-utils`.
+- **Windows** — no terminal [MSYS2 UCRT64](https://www.msys2.org/), instale `curl make tar xz mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-nasm` com `pacman -S --needed`.
+
+No macOS e Linux, rode os três comandos no terminal. No Windows, rode a linha com `bash` no MSYS2 UCRT64 e as linhas com `npm` no PowerShell, na mesma pasta do projeto.
+
+```sh
+npm ci --omit=optional
+bash scripts/build-ffmpeg.sh
+npm run dist
+```
+
+Os instaladores ficam em `dist/`. Use `npm run pack` para gerar apenas a pasta com o aplicativo executável. Os pacotes incluem o ícone, o FFmpeg para vídeo RTSP, a licença LGPL e o código-fonte correspondente. O `.dmg` tem assinatura ad hoc e o `.exe` é gerado sem certificado de distribuição. O macOS e o Windows podem exibir um aviso de segurança na abertura.
+
+Para instalar no macOS, abra o `.dmg` e arraste o aplicativo para **Aplicativos**. No Windows, execute o arquivo `-setup.exe`. No Linux, instale o `.deb` com `sudo apt install ./arquivo.deb` ou marque o `.AppImage` como executável e abra-o diretamente.
+
 ## Conectar uma câmera
 
 1. Use **Buscar na rede** para localizar câmeras por WS-Discovery ou **Adicionar câmera** para preencher o endereço manualmente. É possível informar o IP, `IP:porta` ou a URL completa do serviço ONVIF.

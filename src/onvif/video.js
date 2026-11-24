@@ -2,6 +2,7 @@
 
 const { spawn } = require('node:child_process');
 const { existsSync } = require('node:fs');
+const { join } = require('node:path');
 const { OnvifError } = require('./client');
 
 const jpegStart = Buffer.from([0xff, 0xd8]);
@@ -10,6 +11,11 @@ const maxFrameBytes = 5 * 1024 * 1024;
 
 function ffmpegExecutable() {
   if (process.env.ONVIF_FFMPEG) return process.env.ONVIF_FFMPEG;
+  if (process.resourcesPath) {
+    const binary = process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg';
+    const bundled = join(process.resourcesPath, 'ffmpeg', binary);
+    if (existsSync(bundled)) return bundled;
+  }
   try {
     const executable = require('ffmpeg-static');
     if (executable && existsSync(executable)) return executable;

@@ -1,0 +1,61 @@
+appId: br.local.onvif
+productName: ONVIF Local
+icon: assets/icon.png
+artifactName: "ONVIF-Local-${version}-${os}-${arch}.${ext}"
+
+directories:
+  output: dist
+
+asar: true
+npmRebuild: false
+files:
+  - package.json
+  - src/**/*
+  - assets/icon.png
+  - "!node_modules/ffmpeg-static{,/**/*}"
+extraResources:
+  - from: .build/ffmpeg
+    to: ffmpeg
+    filter:
+      - "**/*"
+      - "!build-target.txt"
+beforePack: scripts/check-bundled-ffmpeg.js
+
+mac:
+  target: dmg
+  category: public.app-category.utilities
+  minimumSystemVersion: "13.0"
+  identity: "-"
+  notarize: false
+  extendInfo:
+    NSLocalNetworkUsageDescription: "O ONVIF Local usa a rede local para localizar câmeras e exibir vídeo."
+
+win:
+  target: nsis
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  artifactName: "ONVIF-Local-${version}-windows-${arch}-setup.${ext}"
+
+linux:
+  syncDesktopName: true
+  target:
+    - AppImage
+    - deb
+  category: AudioVideo
+  maintainer: "ONVIF Local <hevertonfreitas@users.noreply.github.com>"
+
+deb:
+  depends:
+    - "libgtk-3-0 | libgtk-3-0t64"
+    - libnotify4
+    - libnss3
+    - libxss1
+    - libxtst6
+    - xdg-utils
+    - libatspi2.0-0
+    - libuuid1
+    - libsecret-1-0
+    - "libasound2 | libasound2t64"
+    - "libgnutls30 | libgnutls30t64"

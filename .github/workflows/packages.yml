@@ -1,0 +1,69 @@
+name: Instaladores
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: ${{ matrix.artifact }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-2025
+            artifact: windows-x64
+          - runner: macos-15
+            artifact: macos-arm64
+          - runner: macos-15-intel
+            artifact: macos-x64
+          - runner: ubuntu-22.04
+            artifact: linux-x64
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --omit=optional
+      - run: npm run check
+
+      - name: Preparar compilador no Windows
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: curl make tar xz mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-nasm
+      - name: Preparar compilador no Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libgnutls28-dev nasm pkg-config fakeroot
+      - name: Compilar FFmpeg no Windows
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
+        run: bash scripts/build-ffmpeg.sh
+      - name: Compilar FFmpeg no macOS ou Linux
+        if: runner.os != 'Windows'
+        run: npm run build:ffmpeg
+      - name: Gerar instaladores
+        run: npm run dist
+      - name: Guardar instaladores
+        uses: actions/upload-artifact@v7
+        with:
+          name: onvif-local-${{ matrix.artifact }}
+          if-no-files-found: error
+          path: |
+            dist/*.dmg
+            dist/*.exe
+            dist/*.deb
+            dist/*.AppImage
