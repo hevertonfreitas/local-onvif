@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+  <title>ONVIF Local</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="workspace">
+    <aside class="sidebar">
+      <div class="brand">
+        <img class="brand-mark" src="../../assets/icon.png" alt="" width="42" height="42">
+        <div><strong>ONVIF Local</strong><small>Gerenciador de câmeras</small></div>
+      </div>
+
+      <div class="sidebar-controls">
+        <button id="add-camera" class="button primary"><span aria-hidden="true">＋</span> Adicionar câmera</button>
+        <button id="discover" class="button secondary"><span class="radar-icon" aria-hidden="true"></span> Buscar na rede</button>
+      </div>
+
+      <div class="list-heading"><h2>Câmeras</h2><span id="camera-count">0</span></div>
+      <p id="empty-list" class="empty-list">As câmeras cadastradas aparecem aqui.</p>
+      <nav aria-label="Câmeras cadastradas" id="camera-list"></nav>
+
+    </aside>
+
+    <main>
+      <header class="page-header">
+        <div class="page-title">
+          <p id="current-address" class="address" hidden></p>
+          <h1 id="camera-name">Monitoramento</h1>
+          <p id="intro">Adicione uma câmera ou busque dispositivos na rede local.</p>
+        </div>
+        <div class="header-actions">
+          <span id="connection" class="pill" hidden><span class="status-dot"></span><span id="connection-label"></span></span>
+          <button id="edit-camera" class="button secondary" hidden>Editar</button>
+          <button id="connect" class="button primary" hidden>Conectar</button>
+        </div>
+      </header>
+
+      <div class="dashboard">
+        <section class="panel monitor" aria-labelledby="video-heading">
+          <div class="panel-header">
+            <h2 id="video-heading">Visualização</h2>
+            <label id="profile-field" class="profile-field" hidden>
+              <span>Perfil</span>
+              <select id="profiles" aria-label="Perfil de vídeo"></select>
+            </label>
+          </div>
+
+          <div id="viewport" class="viewport">
+            <img id="frame" alt="Vídeo ao vivo da câmera" hidden>
+            <div id="view-status" class="view-status">
+              <span class="view-icon"><span class="camera-icon" aria-hidden="true"></span></span>
+              <strong id="view-title">Nenhuma câmera selecionada</strong>
+              <p id="view-text">Conecte uma câmera ONVIF para visualizar o vídeo.</p>
+            </div>
+            <div id="live-overlay" class="live-overlay" hidden>
+              <span class="live-label"><span class="status-dot"></span> Ao vivo</span>
+              <span id="video-spec" class="video-spec"></span>
+            </div>
+          </div>
+
+          <div class="monitor-controls">
+            <button id="toggle-video" class="button secondary" disabled><span id="play-icon" aria-hidden="true">▶</span> <span id="play-label">Iniciar vídeo</span></button>
+            <button id="capture" class="button quiet" disabled><span class="camera-icon" aria-hidden="true"></span><span id="capture-label">Salvar captura</span></button>
+            <button id="copy-uri" class="button quiet" disabled>Copiar RTSP</button>
+            <button id="fullscreen" class="button quiet fullscreen" title="Tela cheia" aria-label="Tela cheia" disabled>⛶</button>
+          </div>
+        </section>
+
+        <section class="panel ptz" aria-labelledby="ptz-heading">
+          <div class="panel-header"><h2 id="ptz-heading">Controle PTZ</h2><span id="ptz-indicator" class="status-dot" aria-hidden="true"></span></div>
+          <div class="ptz-content">
+            <fieldset id="ptz-controls" disabled>
+              <legend class="visually-hidden">Direção e zoom</legend>
+              <div class="direction-pad">
+                <button class="direction up" type="button" data-vector="0,0.45,0" title="Mover para cima" aria-label="Mover para cima">↑</button>
+                <button class="direction left" type="button" data-vector="-0.45,0,0" title="Mover para a esquerda" aria-label="Mover para a esquerda">←</button>
+                <button class="direction center" id="ptz-stop" type="button" title="Parar movimento" aria-label="Parar movimento">■</button>
+                <button class="direction right" type="button" data-vector="0.45,0,0" title="Mover para a direita" aria-label="Mover para a direita">→</button>
+                <button class="direction down" type="button" data-vector="0,-0.45,0" title="Mover para baixo" aria-label="Mover para baixo">↓</button>
+              </div>
+              <div class="zoom-control">
+                <span>Zoom</span>
+                <button class="button secondary" data-vector="0,0,-0.4" title="Diminuir zoom" aria-label="Diminuir zoom">−</button>
+                <button class="button secondary" data-vector="0,0,0.4" title="Aumentar zoom" aria-label="Aumentar zoom">＋</button>
+              </div>
+            </fieldset>
+            <p id="ptz-hint" class="ptz-hint">Selecione um perfil com suporte a PTZ.</p>
+            <section class="presets" aria-labelledby="presets-heading">
+              <h3 id="presets-heading">Posições salvas</h3>
+              <div class="preset-actions">
+                <select id="presets" aria-label="Posição PTZ salva" disabled><option>Sem posições</option></select>
+                <button id="goto-preset" class="button secondary" disabled>Ir</button>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="panel device" aria-labelledby="device-heading">
+          <div class="panel-header"><h2 id="device-heading">Informações do dispositivo</h2></div>
+          <p id="device-empty" class="device-empty">Os detalhes aparecem após a conexão.</p>
+          <dl id="device-info" class="device-info" hidden></dl>
+        </section>
+      </div>
+    </main>
+  </div>
+  <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+  <dialog id="camera-dialog">
+    <form id="camera-form" aria-labelledby="form-title">
+      <div class="dialog-header">
+        <h2 id="form-title">Adicionar câmera</h2>
+        <button type="button" class="button quiet close" data-close="camera-dialog" aria-label="Fechar">×</button>
+      </div>
+      <div class="fields">
+        <label>Nome <input id="label" autocomplete="off" maxlength="100" placeholder="Ex.: Entrada"></label>
+        <label>IP ou URL ONVIF <input id="address" autocomplete="off" spellcheck="false" maxlength="500" placeholder="Ex.: 192.168.1.50:2020" required></label>
+        <div class="credential-fields">
+          <label>Usuário ONVIF <input id="username" autocomplete="username" maxlength="150"></label>
+          <label>Senha <input id="password" type="password" autocomplete="current-password" maxlength="500"></label>
+        </div>
+        <label class="checkbox"><input id="remember" type="checkbox"> Salvar senha no cofre do sistema</label>
+        <p id="form-error" class="form-error" role="alert" hidden></p>
+      </div>
+      <div class="dialog-actions">
+        <button id="remove-camera" type="button" class="button danger" hidden>Remover câmera</button>
+        <button type="button" class="button secondary cancel" data-close="camera-dialog">Cancelar</button>
+        <button id="submit-camera" type="submit" class="button primary">Salvar e conectar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="discovery-dialog" aria-labelledby="discovery-title">
+    <div class="dialog-header">
+      <h2 id="discovery-title">Câmeras na rede</h2>
+      <button type="button" class="button quiet close" data-close="discovery-dialog" aria-label="Fechar">×</button>
+    </div>
+    <div id="discovery-content" class="discovery-content" aria-live="polite"></div>
+    <div class="dialog-actions">
+      <button type="button" class="button secondary cancel" data-close="discovery-dialog">Fechar</button>
+      <button id="retry-discovery" type="button" class="button primary">Buscar novamente</button>
+    </div>
+  </dialog>
+
+  <dialog id="remove-dialog" aria-labelledby="remove-title">
+    <div class="dialog-header"><h2 id="remove-title">Remover câmera</h2></div>
+    <p id="remove-text" class="remove-text"></p>
+    <div class="dialog-actions">
+      <button type="button" class="button secondary cancel" data-close="remove-dialog">Cancelar</button>
+      <button id="confirm-remove" type="button" class="button danger">Remover</button>
+    </div>
+  </dialog>
+</body>
+</html>

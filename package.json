@@ -1,0 +1,24 @@
+{
+  "name": "onvif-local",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Gerenciador de câmeras ONVIF para redes locais",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "check": "node scripts/check.js",
+    "test:camera": "node scripts/probe-camera.js"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "saxes": "^6.0.0"
+  },
+  "devDependencies": {
+    "electron": "^45.4.1"
+  },
+  "optionalDependencies": {
+    "ffmpeg-static": "^5.3.0"
+  }
+}
